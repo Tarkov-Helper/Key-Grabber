@@ -1,0 +1,15 @@
+{
+    "name": "key-grabber",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./src/main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Betrix",
+    "license": "MIT",
+    "dependencies": {
+        "got": "^11.8.2",
+        "website-scraper": "^4.2.3"
+    }
+}
