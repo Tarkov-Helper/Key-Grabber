@@ -14,6 +14,7 @@ A simple program to parse data from the [wiki](https://escapefromtarkov.fandom.c
         "[Duffle bag](https://escapefromtarkov.fandom.com/wiki/Duffle_bag)",
         "Loose loot ([Roubles](https://escapefromtarkov.fandom.com/wiki/Roubles))"
     ],
+}
 ```
 
 ### Markdown Preview
