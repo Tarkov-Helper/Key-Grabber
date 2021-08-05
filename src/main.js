@@ -1,6 +1,13 @@
 const fs = require('fs')
 const got = require('got')
 
+const Insert = (str, add, position) => {
+    return [str.slice(0, position), add, str.slice(position)].join('');
+}
+const Slice = (str, pos) => {
+    return str.slice(0, pos) + str.slice(pos + 1)
+}
+
 async function GrabKeys() {
     let query = JSON.stringify({
         query: `{
@@ -40,50 +47,54 @@ async function GrabKeys() {
 
         let wikiText = response.query.pages
         wikiText = wikiText[Object.keys(wikiText)[0]]
-        if (wikiText.revisions === undefined) { continue } // No wiki entry
+            // console.log(wikiText.revisions)
         wikiText = wikiText.revisions[0]['*']
 
         if (!wikiText.includes('==Behind the Lock==')) {
             output[key.name] = []
             continue
         } else {
-            let loot = wikiText.split('==Behind the Lock==')[1].split('==')[0].split('\n').filter(str => str !== '')
+            let loot = wikiText.split('==Behind the Lock==')[1].split('==')[0].split('{')[0].split('<')[0].split('\n').filter(str => str !== '')
 
             // Add links
             for (i in loot) {
                 let item = loot[i]
 
-                if (!item.startsWith('*')) { item = '' }
+                if (item.startsWith('*')) { // One Room Key
 
-                const Insert = (str, add, position) => {
-                    return [str.slice(0, position), add, str.slice(position)].join('');
+                    while (item.includes('[[') && item.includes(']]')) {
+
+                        let start = item.indexOf('[[')
+                        let end = item.indexOf(']]')
+
+                        // Remove one set of brackets
+                        item = Slice(item, start)
+                        item = Slice(item, end)
+
+                        // Format link
+                        let mentionedItem = item.substring(start + 1, end - 1).replaceAll(' ', '_').split('|')[0]
+                        let itemLink = `(https://escapefromtarkov.fandom.com/wiki/${mentionedItem})`
+
+                        // Add link to string to create hyperlink
+                        item = Insert(item, itemLink, end)
+                    }
+
+                } else { // Key has multiple rooms 
+
+
+
                 }
-                const Slice = (str, pos) => {
-                    return str.slice(0, pos) + str.slice(pos + 1)
+
+                if (item.toLowerCase().includes('room') && !item.includes('https://')) {
+                    item = `**${item.replaceAll('* ', '').replaceAll('*', '')}**` // Bolds room name for better readability
+                } else {
+                    item = item.replaceAll('* ', '').replaceAll('*', '')
                 }
 
-                while (item.includes('[[') && item.includes(']]')) {
-
-                    let start = item.indexOf('[[')
-                    let end = item.indexOf(']]')
-
-                    // Remove one set of brackets
-                    item = Slice(item, start)
-                    item = Slice(item, end)
-
-                    // Format link
-                    let mentionedItem = item.substring(start + 1, end - 1).replaceAll(' ', '_').split('|')[0]
-                    let itemLink = `(https://escapefromtarkov.fandom.com/wiki/${mentionedItem})`
-
-                    // Add link to string to create hyperlink
-                    item = Insert(item, itemLink, end)
-                }
-
-                loot[i] = item.replace('* ', '').replace('*', '')
+                loot[i] = item
             }
 
             loot = loot.filter(str => str !== '')
-
             output[key.id] = loot
         }
     }
